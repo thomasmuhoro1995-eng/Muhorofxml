@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://w3.org" collection="false">
+  <block type="trade_definition" id="deriv_bot_quick_strategy" x="0" y="0">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="market_config" deletable="false" movable="false">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">random_index</field>
+        <field name="SYMBOL_LIST">R_100</field>
+        <field name="TRADETYPECAT_LIST">callput</field>
+        <field name="TRADETYPE_LIST">higherlower</field>
+        <field name="TYPE_LIST">both</field>
+        <field name="CANDLEINTERVAL_LIST">60</field>
+        <next>
+          <block type="trade_definition_restartbuysell" id="restart_config" deletable="false" movable="false">
+            <field name="TIME_MACHINE_ENABLED">FALSE</field>
+            <next>
+              <block type="trade_definition_restartonerror" id="error_config" deletable="false" movable="false">
+                <field name="RESTARTONERROR">FALSE</field>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="set_stake">
+        <field name="VAR">Stake per trade</field>
+        <value name="VALUE">
+          <block type="math_number" id="val_stake">
+            <field name="NUM">2</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="set_h_duration">
+            <field name="VAR">Higher duration (ticks)</field>
+            <value name="VALUE">
+              <block type="math_number" id="val_h_dur">
+                <field name="NUM">5</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="set_h_barrier">
+                <field name="VAR">Higher barrier below (offset)</field>
+                <value name="VALUE">
+                  <block type="math_number" id="val_h_bar">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="set_l_duration">
+                    <field name="VAR">Lower duration (ticks)</field>
+                    <value name="VALUE">
+                      <block type="math_number" id="val_l_dur">
+                        <field name="NUM">5</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="set_l_barrier">
+                        <field name="VAR">Lower barrier above (offset)</field>
+                        <value name="VALUE">
+                          <block type="math_number" id="val_l_bar">
+                            <field name="NUM">1</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="trade_options_config">
+        <mutation has_first_barrier="true" has_second_barrier="false"></mutation>
+        <field name="DURATIONTYPE_LIST">t</field>
+        <value name="DURATION">
+          <block type="variables_get" id="get_duration">
+            <field name="VAR">Higher duration (ticks)</field>
+          </block>
+        </value>
+        <value name="AMOUNT">
+          <block type="variables_get" id="get_stake">
+            <field name="VAR">Stake per trade</field>
+          </block>
+        </value>
+        <value name="BARRIEROFFSET">
+          <block type="variables_get" id="get_barrier">
+            <field name="VAR">Higher barrier below (offset)</field>
+          </block>
+        </value>
+      </block>
+    </statement>
+  </block>
+</xml>
