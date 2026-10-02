@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://www.w3.org" collection="false">
+  <!-- Block 1: Trade Parameters Initialization -->
+  <block type="trade_parameters" id="vol100_higher_lower_setup" x="20" y="20">
+    <statement name="TRADE_OPTIONS">
+      <block type="market" id="market_setup">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">continuous_indices</field>
+        <field name="SYMBOL_LIST">R_100</field>
+        <field name="TRADETYPECAT_LIST">callput</field>
+        <field name="TRADETYPE_LIST">higherlower</field>
+        <field name="TYPE_LIST">both</field>
+        <field name="CANDLEINTERVAL_LIST">60</field>
+        <value name="DURATION">
+          <shadow type="math_number" id="duration_ticks">
+            <field name="NUM">5</field>
+          </shadow>
+        </value>
+        <value name="DURATION_UNIT">
+          <shadow type="duration_market" id="unit_ticks">
+            <field name="DURATION_MARKET_LIST">t</field>
+          </shadow>
+        </value>
+        <value name="STAKE">
+          <shadow type="math_number" id="stake_amount">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+        <value name="BARRIEROFFSET">
+          <shadow type="math_number" id="barrier_offset_high">
+            <field name="NUM">-1</field>
+          </shadow>
+        </value>
+        <value name="SECONDBARRIEROFFSET">
+          <shadow type="math_number" id="barrier_offset_low">
+            <field name="NUM">1</field>
+          </shadow>
+        </value>
+      </block>
+    </statement>
+    
+    <!-- Block 2: Run Once At Start -->
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="set_stake">
+        <field name="VAR">Stake per trade</field>
+        <value name="VALUE">
+          <block type="math_number">
+            <field name="NUM">1</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="set_high_duration">
+            <field name="VAR">Higher duration (ticks)</field>
+            <value name="VALUE">
+              <block type="math_number">
+                <field name="NUM">5</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="set_high_barrier">
+                <field name="VAR">Higher barrier below (offset)</field>
+                <value name="VALUE">
+                  <block type="math_number">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="set_low_duration">
+                    <field name="VAR">Lower duration (ticks)</field>
+                    <value name="VALUE">
+                      <block type="math_number">
+                        <field name="NUM">5</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="set_low_barrier">
+                        <field name="VAR">Lower barrier above (offset)</field>
+                        <value name="VALUE">
+                          <block type="math_number">
+                            <field name="NUM">1</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+
+  <!-- Block 3: Purchase Conditions -->
+  <block type="before_purchase" id="purchase_logic" x="20" y="450">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="purchase" id="buy_contract">
+        <field name="PURCHASE_LIST">HIGHER</field>
+      </block>
+    </statement>
+  </block>
+
+  <!-- Block 4: Post-Trade Management -->
+  <block type="after_purchase" id="post_trade_logic" x="20" y="600">
+    <statement name="AFTERPURCHASE_STACK">
+      <block type="trade_again" id="loop_trade"></block>
+    </statement>
+  </block>
+</xml>
