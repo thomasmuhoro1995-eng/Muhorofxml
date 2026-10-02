@@ -1,0 +1,95 @@
+<xml xmlns="http://www.w3.org/collection" collection="false">
+  <block type="trade_definition" id="deriv_bot_trade_setup" x="0" y="0">
+    <statement name="TRADE_OPTIONS">
+      <block type="trade_definition_market" id="market_setup" deletable="false" movable="false">
+        <field name="MARKET_LIST">synthetic_index</field>
+        <field name="SUBMARKET_LIST">continuous_indices</field>
+        <field name="SYMBOL_LIST">R_100_1S</field>
+        <next>
+          <block type="trade_definition_tradetype" id="type_setup" deletable="false" movable="false">
+            <field name="TRADETYPECAT_LIST">callput</field>
+            <field name="TRADETYPE_LIST">risefall</field>
+            <next>
+              <block type="trade_definition_contracttype" id="contract_setup" deletable="false" movable="false">
+                <field name="TYPE_LIST">both</field>
+                <next>
+                  <block type="trade_definition_candleinterval" id="candle_setup" deletable="false" movable="false">
+                    <field name="CANDLEINTERVAL_LIST">60</field>
+                    <next>
+                      <block type="trade_definition_restartbuysell" id="restart_buy_sell">
+                        <field name="TIME_MACHINE_ENABLED">FALSE</field>
+                        <next>
+                          <block type="trade_definition_restartonerror" id="restart_on_error">
+                            <field name="RESTARTONERROR">TRUE</field>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="INITIALIZATION">
+      <block type="variables_set" id="set_stake">
+        <field name="VAR">Stake per trade</field>
+        <value name="VALUE">
+          <block type="math_number">
+            <field name="NUM">5</field>
+          </block>
+        </value>
+        <next>
+          <block type="variables_set" id="set_higher_duration">
+            <field name="VAR">Higher duration (ticks)</field>
+            <value name="VALUE">
+              <block type="math_number">
+                <field name="NUM">5</field>
+              </block>
+            </value>
+            <next>
+              <block type="variables_set" id="set_higher_barrier">
+                <field name="VAR">Higher barrier below (offset)</field>
+                <value name="VALUE">
+                  <block type="math_number">
+                    <field name="NUM">1</field>
+                  </block>
+                </value>
+                <next>
+                  <block type="variables_set" id="set_lower_duration">
+                    <field name="VAR">Lower duration (ticks)</field>
+                    <value name="VALUE">
+                      <block type="math_number">
+                        <field name="NUM">5</field>
+                      </block>
+                    </value>
+                    <next>
+                      <block type="variables_set" id="set_lower_barrier">
+                        <field name="VAR">Lower barrier above (offset)</field>
+                        <value name="VALUE">
+                          <block type="math_number">
+                            <field name="NUM">1</field>
+                          </block>
+                        </value>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    <statement name="SUBMARKET">
+      <block type="trade_definition_tradeoptions" id="trade_options_block">
+        <!-- Main placeholder container for trade execution conditions -->
+      </block>
+    </statement>
+  </block>
+  <block type="purchase" id="purchase_setup" x="0" y="600">
+    <field name="PURCHASE_LIST">RISE</field>
+  </block>
+</xml>
