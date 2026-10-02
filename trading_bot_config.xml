@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml xmlns="http://w3.org" collection="false">
+  
+  <!-- ===================================== -->
+  <!-- STACK 1: TRADE PARAMETERS (INITIALIZATION) -->
+  <!-- ===================================== -->
+  <block type="trade_parameters" id="1" x="-16" y="10">
+    <statement name="TRADE_PARAMETERS">
+      <block type="market" id="2">
+        <field name="MARKET">Derived</field>
+        <field name="SUBMARKET">Continuous Indices</field>
+        <field name="INDEX">Volatility 100 (1s) Index</field>
+        <next>
+          <block type="trade_type" id="3">
+            <field name="TRADE_TYPE">Up/Down</field>
+            <field name="SUBTYPE">Rise/Fall</field>
+            <next>
+              <block type="contract_type" id="4">
+                <field name="CONTRACT_TYPE">Both</field>
+                <next>
+                  <block type="candle_interval" id="5">
+                    <field name="INTERVAL">1 minute</field>
+                    <next>
+                      <block type="restart_on_error" id="6">
+                        <field name="BUY_SELL">FALSE</field>
+                        <field name="LAST_TRADE">TRUE</field>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+    
+    <statement name="SUB_INITIALIZATION">
+      <!-- Risk & Stake Variables -->
+      <block type="variables_set" id="init_stake">
+        <field name="VAR">Initial Stake</field>
+        <value name="VALUE">
+          <block type="math_number"><field name="NUM">5</field></block>
+        </value>
+        <next>
+          <block type="variables_set" id="current_stake">
+            <field name="VAR">Stake per trade</field>
+            <value name="VALUE">
+              <block type="math_number"><field name="NUM">5</field></block>
+            </value>
+            <next>
+              <block type="variables_set" id="tp">
+                <field name="VAR">Take Profit</field>
+                <value name="VALUE">
+                  <block type="math_number"><field name="NUM">20</field></block>
+                </value>
+                <next>
+                  <block type="variables_set" id="sl">
+                    <field name="VAR">Stop Loss</field>
+                    <value name="VALUE">
+                      <block type="math_number"><field name="NUM">50</field></block>
+                    </value>
+                    <next>
+                      <!-- Your Specific Offset and Duration Inputs -->
+                      <block type="set_duration" id="9">
+                        <field name="DURATION_TYPE">Higher duration (ticks)</field>
+                        <value name="DURATION_VALUE">
+                          <block type="math_number"><field name="NUM">5</field></block>
+                        </value>
+                        <next>
+                          <block type="set_barrier" id="11">
+                            <field name="BARRIER_TYPE">Higher barrier below (offset)</field>
+                            <value name="BARRIER_VALUE">
+                              <block type="math_number"><field name="NUM">1</field></block>
+                            </value>
+                            <next>
+                              <block type="set_duration" id="13">
+                                <field name="DURATION_TYPE">Lower duration (ticks)</field>
+                                <value name="DURATION_VALUE">
+                                  <block type="math_number"><field name="NUM">5</field></block>
+                                </value>
+                                <next>
+                                  <block type="set_barrier" id="15">
+                                    <field name="BARRIER_TYPE">Lower barrier above (offset)</field>
+                                    <value name="BARRIER_VALUE">
+                                      <block type="math_number"><field name="NUM">1</field></block>
+                                    </value>
+                                  </block>
+                                </next>
+                              </block>
+                            </next>
+                          </block>
+                        </next>
+                      </block>
+                    </next>
+                  </block>
+                </next>
+              </block>
+            </next>
+          </block>
+        </next>
+      </block>
+    </statement>
+  </block>
+
+  <!-- ===================================== -->
+  <!-- STACK 2: BEFORE PURCHASE CONDITIONS -->
+  <!-- ===================================== -->
+  <block type="before_purchase" id="17" x="600" y="10">
+    <statement name="BEFOREPURCHASE_STACK">
+      <block type="purchase" id="18">
+        <field name="PURCHASE_TYPE">Rise</field>
+      </block>
+    </statement>
+  </block>
+
+  <!-- ===================================== -->
+  <!-- STACK 3: DURING THE TRADE (OPTIONAL/EMPTY) -->
+  <!-- ===================================== -->
+  <block type="during_purchase" id="19" x="600" y="150">
+    <statement name="DURINGPURCHASE_STACK">
+      <!-- Leave blank for auto execution based on Stack 1 -->
+    </statement>
+  </block>
+
+  <!-- ===================================== -->
+  <!-- STACK 4: AFTER TRADE (RISK & MARTINGALE LOGIC) -->
+  <!-- ===================================== -->
+  <block type="after_purchase" id="20" x="600" y="300">
+    <statement name="AFTERPURCHASE_STACK">
+      <blocks>
+        <!-- Check Total Profit against Take Profit and Stop Loss -->
+        <block type="controls_if" id="check_limits">
+          <mutation else="1"></mutation>
+          <value name="IF0">
+            <block type="logic_operation" id="and_limits">
+              <field name="OP">AND</field>
+              <value name="A">
+                <block type="logic_compare" id="check_sl">
+                  <field name="OP">GT</field>
+                  <value name="A"><block type="total_profit"></block></value>
+                  <value name="B">
+                    <block type="math_single">
+                      <field name="OP">NEG</field>
+                      <value name="NUM"><block type="variables_get"><field name="VAR">Stop Loss</field></block></value>
+                    </block>
+                  </value>
+                </block>
+              </value>
+              <value name="B">
+                <block type="logic_compare" id="check_tp">
+                  <field name="OP">LT</field>
+                  <value name="A"><block type="total_profit"></block></value>
+                  <value name="B"><block type="variables_get"><field name="VAR">Take Profit</field></block></value>
+                </block>
+              </value>
+            </block>
+          </value>
+          <!-- If within acceptable target limits, calculate next stake -->
+          <statement name="DO0">
+            <block type="controls_if" id="martingale_logic">
+              <mutation else="1"></mutation>
+              <value name="IF0">
+                <block type="contract_check_result">
+                  <field name="CHECK_RESULT">win</field>
+                </block>
+              </value>
+              <!-- On Win: Reset stake back to Initial Stake -->
+              <statement name="DO0">
+                <block type="variables_set" id="reset_win">
+                  <field name="VAR">Stake per trade</field>
+                  <value name="VALUE">
+                    <block type="variables_get"><field name="VAR">Initial Stake</field></block>
+                  </value>
+                </block>
+              </statement>
+              <!-- On Loss: Multiply current stake by a standard factor of 2 -->
+              <statement name="ELSE">
+                <block type="variables_set" id="apply_martingale">
+                  <field name="VAR">Stake per trade</field>
+                  <value name="VALUE">
+                    <block type="math_arithmetic" id="mult_loss">
+                      <field name="OP">MULTIPLY</field>
+                      <value name="A"><block type="variables_get"><field name="VAR">Stake per trade</field></block></value>
+                      <value name="B"><block type="math_number"><field name="NUM">2</field></block></value>
+                    </block>
+                  </value>
+                </block>
+              </statement>
+              <next>
+                <!-- Signal the engine to trade again -->
+                <block type="trade_again" id="loop_trade"></block>
+              </next>
+            </block>
+          </statement>
+          <!-- If Target or Deficit limits are breached, the bot stops executing automatically -->
+        </block>
+      </blocks>
+    </statement>
+  </block>
+
+</xml>
